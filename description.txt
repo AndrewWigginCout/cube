@@ -1,0 +1,31 @@
+Cube is a C++ program that solves a 2x2x2 Rubik's cube. I wrote it because I like puzzles.
+
+This app uses Object Oriented Programming and a breath first search to model Rubik's cube permutations. It catalogs all permutations, and keeps a solve movelist for each.
+
+The representational data structure is a simple 24 character array. The cube has 24 stickers, so I just put them all in a list, a sort of flattening of the surfaces.
+
+Appended to the end of that is space for a movelist. The moves are represented by a integer that corresponds to the axis of rotation and how many twists.
+
+Since there are three axises, and three twists, (clockwise, counter clockwise, and 180 degrees), there are 9 different twist operations so I use the numbers 0-8.
+
+9 is the move list terminator.
+
+The transformation function is like a slider puzzle. There is a list of start and end positions, so I used a for loop to change the position of every sticker. Ie, copy the value for the ith sticker to a new index, depending on a table that is constructed to model the twist.
+
+It was a real tedious job to create that transformation matrix M. I put literal stickers with hand written numbers on an actual physical cube, and twisted it to construct the transformation matrix.
+
+To make the transformation as speedy as possible, since I didn't even know for sure where computational bottle necks might emerge, I used a specialized constructor that would make a new cube object. It would make a twisted derivative of a given cube directly into a new cube in a single pass hopefully being speedier than twisting an existing cube.
+
+Now that the cube is modeled, the next part is to model the search space.
+
+The key idea is to work backwards. The app starts with the solved state as the intial position, then tries to create the arbitary user provided scrambled cube. When the app creates it, the user merely has to undo the movelist, IE peform the individual move inverses backwards.
+
+So begins the search. A depth first search is not useful in this case because the search space is not hierarchical. The "maze" connects to itself, and so breadth first prevents rendundant backtracking.
+
+I created a new data structure, a vector of sets to represent the search space. The zeroeth set contains the intial position, with 0 moves necessary to return to a solved state. Set 1 contains 9 cubes that can be created from the lower level, the initial state. From there on there is a shortcut to skip twisting the same axis twice, since those twists were already generated in the previous level.
+
+At each point generated cubes are compared for uniqueness of the entire multiset to avoid duplicates. Also, I < was comparing my work to the Wikipedia page on the two layer Rubik's cube, and it was a relief to see that we both agreed on the number of cubes at each level. I realize now that I could have just used a counter.
+
+Due to the small relative complexity, the entire search space can fit in only 50 MB. To model a 3x3x3 cube would have taken more RAM, and some clever tricks to cleave the search space, using a hybrid approach of depth first search and breadth first search.
+
+Some ideas for future improvement might be to use a hash table instead of a set. I could create a nice graphical interface. Also there might be a gain to be had by using multiple cores and parallel processing.
